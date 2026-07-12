@@ -11,6 +11,7 @@ import CreateOrder from './pages/CreateOrder';
 import Invoice from './pages/Invoice';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import CategoryManagement from './pages/CategoryManagement';
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { user } = useAppContext();
@@ -36,6 +37,7 @@ const AppRoutes = () => {
         <Route path="order" element={<CreateOrder />} />
         <Route path="invoice/:id" element={<Invoice />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="categories" element={<ProtectedRoute requireAdmin><CategoryManagement /></ProtectedRoute>} />
         <Route path="settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
       </Route>
     </Routes>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, FileText, Settings as SettingsIcon, LogOut, Store } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, FileText, Settings as SettingsIcon, LogOut, Store, Tags } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 const Layout = () => {
@@ -20,6 +20,7 @@ const Layout = () => {
   ];
 
   if (user?.role === 'admin') {
+    menuItems.push({ path: '/categories', icon: <Tags className="w-6 h-6" />, label: 'Categories' });
     menuItems.push({ path: '/settings', icon: <SettingsIcon className="w-6 h-6" />, label: 'Settings' });
   }
 
