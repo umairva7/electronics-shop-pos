@@ -82,7 +82,9 @@ const Invoice = () => {
             <tr className="border-b-2 border-slate-800 text-slate-800">
               <th className="py-3 px-2 font-bold uppercase text-sm tracking-wider">Description</th>
               <th className="py-3 px-2 font-bold uppercase text-sm tracking-wider text-center">Qty</th>
-              <th className="py-3 px-2 font-bold uppercase text-sm tracking-wider text-right">Price</th>
+              <th className="py-3 px-2 font-bold uppercase text-sm tracking-wider text-right">Base Price</th>
+              <th className="py-3 px-2 font-bold uppercase text-sm tracking-wider text-right">Negotiated</th>
+              <th className="py-3 px-2 font-bold uppercase text-sm tracking-wider text-right">Discount</th>
               <th className="py-3 px-2 font-bold uppercase text-sm tracking-wider text-right">Total</th>
             </tr>
           </thead>
@@ -94,8 +96,10 @@ const Invoice = () => {
                   <p className="text-sm text-slate-500 font-mono">{item.product.sku}</p>
                 </td>
                 <td className="py-4 px-2 text-center text-lg font-medium">{item.qty}</td>
-                <td className="py-4 px-2 text-right text-lg font-medium">${item.unitPrice.toFixed(2)}</td>
-                <td className="py-4 px-2 text-right text-lg font-bold">${item.total.toFixed(2)}</td>
+                <td className="py-4 px-2 text-right text-lg text-slate-500 line-through">₨{item.basePrice.toLocaleString()}</td>
+                <td className="py-4 px-2 text-right text-lg font-medium">₨{item.negotiatedPrice.toLocaleString()}</td>
+                <td className="py-4 px-2 text-right text-lg font-medium text-red-500">{item.discount < 0 ? `-₨${Math.abs(item.discount).toLocaleString()}` : '-'}</td>
+                <td className="py-4 px-2 text-right text-lg font-bold">₨{item.lineTotal.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -111,21 +115,23 @@ const Invoice = () => {
           <div className="w-full md:w-1/2 bg-slate-50 p-6 rounded-xl border border-slate-200">
             <div className="flex justify-between py-2 text-lg">
               <span className="text-slate-600 font-medium">Subtotal</span>
-              <span className="font-bold">${order.subtotal.toFixed(2)}</span>
+              <span className="font-bold">₨{order.subtotal.toLocaleString()}</span>
             </div>
-            {order.discount > 0 && (
+            {order.totalDiscount < 0 && (
               <div className="flex justify-between py-2 text-lg text-red-600">
-                <span className="font-medium">Discount</span>
-                <span className="font-bold">-${order.discount.toFixed(2)}</span>
+                <span className="font-medium">Total Discount</span>
+                <span className="font-bold">-₨{Math.abs(order.totalDiscount).toLocaleString()}</span>
               </div>
             )}
-            <div className="flex justify-between py-2 text-lg">
-              <span className="text-slate-600 font-medium">Tax ({settings.taxRate}%)</span>
-              <span className="font-bold">${order.tax.toFixed(2)}</span>
-            </div>
+            {order.tax > 0 && (
+              <div className="flex justify-between py-2 text-lg">
+                <span className="text-slate-600 font-medium">Tax ({settings.taxRate}%)</span>
+                <span className="font-bold">₨{order.tax.toLocaleString()}</span>
+              </div>
+            )}
             <div className="flex justify-between py-4 mt-2 border-t-2 border-slate-800 text-2xl">
               <span className="font-black uppercase tracking-wider">Total</span>
-              <span className="font-black text-brand-blue">${order.total.toFixed(2)}</span>
+              <span className="font-black text-brand-blue text-4xl">₨ {order.finalTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             </div>
           </div>
         </div>
