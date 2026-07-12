@@ -232,7 +232,7 @@ const CreateOrder = () => {
                     <div className="mt-3 bg-blue-50 p-2 rounded-lg border border-blue-100 flex items-center gap-2 text-xs text-blue-800">
                       <History className="w-4 h-4 shrink-0" />
                       <div className="flex-1 truncate">
-                        Last prices: {product.priceHistory.slice(0, 5).map(h => `₨${h.price.toLocaleString()}`).join(' | ')}
+                        Last prices: {product.priceHistory.slice(0, settings.priceHistoryRetention || 5).map(h => `₨${h.price.toLocaleString()}`).join(' | ')}
                       </div>
                     </div>
                   )}
