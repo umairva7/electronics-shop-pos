@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { Plus, Search, Edit2, X, Check, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const ProductModal = ({ isOpen, onClose, product, onSave }) => {
   const { categories } = useAppContext();
   const [formData, setFormData] = useState({
     name: '', category: categories[0]?.name || 'Solar Panels', quantity: 0, basePrice: 0, sku: '',

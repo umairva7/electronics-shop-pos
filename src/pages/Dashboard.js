@@ -14,7 +14,7 @@ const Dashboard = () => {
   // Today's orders
   const today = new Date().toISOString().split('T')[0];
   const todaysOrders = orders.filter(o => o.date.startsWith(today));
-  const todaysSales = todaysOrders.reduce((acc, o) => acc + o.total, 0);
+  const todaysSales = todaysOrders.reduce((acc, o) => acc + (o.finalTotal || o.total || 0), 0);
 
   const recentOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
@@ -71,7 +71,7 @@ const Dashboard = () => {
           </div>
           <div>
             <p className="text-slate-500 font-medium">Today's Sales</p>
-            <p className="text-3xl font-bold text-slate-900">${todaysSales.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-slate-900">₨{todaysSales.toLocaleString()}</p>
             <p className="text-sm text-emerald-600 font-medium">{todaysOrders.length} orders</p>
           </div>
         </div>
@@ -102,7 +102,7 @@ const Dashboard = () => {
                   <p className="text-sm text-slate-500">{new Date(order.date).toLocaleString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-brand-blue">${order.total.toFixed(2)}</p>
+                  <p className="font-bold text-brand-blue">₨{(order.finalTotal || order.total || 0).toLocaleString()}</p>
                   <p className="text-sm text-slate-500">{order.items.length} items</p>
                 </div>
               </div>

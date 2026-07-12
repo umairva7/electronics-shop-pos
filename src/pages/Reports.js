@@ -14,7 +14,7 @@ const Reports = () => {
   filterDate.setDate(filterDate.getDate() - parseInt(dateFilter));
   
   const filteredOrders = orders.filter(o => new Date(o.date) >= filterDate);
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+  const totalRevenue = filteredOrders.reduce((sum, o) => sum + (o.finalTotal || o.total || 0), 0);
   const totalOrders = filteredOrders.length;
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
@@ -22,7 +22,7 @@ const Reports = () => {
   const salesByDate = {};
   filteredOrders.forEach(o => {
     const d = new Date(o.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    salesByDate[d] = (salesByDate[d] || 0) + o.total;
+    salesByDate[d] = (salesByDate[d] || 0) + (o.finalTotal || o.total || 0);
   });
   
   const chartData = Object.keys(salesByDate).map(date => ({
@@ -59,7 +59,7 @@ const Reports = () => {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-slate-500 font-medium">Total Revenue</p>
-              <h3 className="text-4xl font-black text-slate-900 mt-1">${totalRevenue.toFixed(2)}</h3>
+              <h3 className="text-4xl font-black text-slate-900 mt-1">₨ {totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</h3>
             </div>
             <div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg">
               <DollarSign className="w-6 h-6" />
@@ -83,7 +83,7 @@ const Reports = () => {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-slate-500 font-medium">Average Order</p>
-              <h3 className="text-4xl font-black text-slate-900 mt-1">${avgOrderValue.toFixed(2)}</h3>
+              <h3 className="text-4xl font-black text-slate-900 mt-1">₨ {avgOrderValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</h3>
             </div>
             <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
               <TrendingUp className="w-6 h-6" />
@@ -98,7 +98,7 @@ const Reports = () => {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} dx={-10} tickFormatter={(value) => `$${value}`} />
+            <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} dx={-10} tickFormatter={(value) => `₨${value}`} />
             <Tooltip 
               cursor={{fill: '#f1f5f9'}}
               contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
@@ -131,7 +131,7 @@ const Reports = () => {
                     {new Date(order.date).toLocaleDateString()} {new Date(order.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </td>
                   <td className="py-4 px-6 text-slate-600">{order.items.length} items</td>
-                  <td className="py-4 px-6 text-right font-bold text-slate-900">${order.total.toFixed(2)}</td>
+                  <td className="py-4 px-6 text-right font-bold text-slate-900">₨ {(order.finalTotal || order.total || 0).toLocaleString()}</td>
                   <td className="py-4 px-6 text-center">
                     <button 
                       onClick={() => navigate(`/invoice/${order.id}`)}
