@@ -43,18 +43,31 @@ const Settings = () => {
             General Shop Info
           </h2>
           
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Shop Name (Printed on Receipt)</label>
-              <input
-                type="text"
-                value={formData.shopName}
-                onChange={(e) => setFormData({...formData, shopName: e.target.value})}
-                className="w-full md:w-2/3 px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none text-lg"
-                required
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Shop Name (Printed on Receipt)</label>
+                <input
+                  type="text"
+                  value={formData.shopName}
+                  onChange={(e) => setFormData({...formData, shopName: e.target.value})}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none text-lg"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Currency</label>
+                <select
+                  value={formData.currency || 'PKR'}
+                  onChange={(e) => setFormData({...formData, currency: e.target.value})}
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none text-lg"
+                >
+                  <option value="PKR">Pakistani Rupee (₨)</option>
+                  <option value="USD">US Dollar ($)</option>
+                  <option value="EUR">Euro (€)</option>
+                </select>
+              </div>
             </div>
-          </div>
         </div>
 
         {/* Financial Settings */}
@@ -64,7 +77,6 @@ const Settings = () => {
             Financial & Rules
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Default Tax Rate (%)</label>
               <input
@@ -90,6 +102,20 @@ const Settings = () => {
                 required
               />
               <p className="text-xs text-slate-500 mt-2">Cashiers cannot exceed this discount percentage.</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Price History Retention</label>
+              <select
+                value={formData.priceHistoryRetention || 5}
+                onChange={(e) => setFormData({...formData, priceHistoryRetention: parseInt(e.target.value) || 5})}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none text-lg font-mono"
+              >
+                <option value={3}>Last 3 prices</option>
+                <option value={5}>Last 5 prices</option>
+                <option value={10}>Last 10 prices</option>
+              </select>
+              <p className="text-xs text-slate-500 mt-2">Number of previous customer prices to show during order creation.</p>
             </div>
           </div>
         </div>
