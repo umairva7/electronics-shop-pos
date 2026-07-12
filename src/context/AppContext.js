@@ -5,29 +5,97 @@ const AppContext = createContext();
 export const useAppContext = () => useContext(AppContext);
 
 // Mock Data
+const MOCK_CATEGORIES = [
+  {
+    id: "solar-panels",
+    name: "Solar Panels",
+    fields: [
+      { name: "Wattage", type: "text", required: true },
+      { name: "Voltage", type: "dropdown", options: ["12V", "24V", "48V"], required: true },
+      { name: "Type", type: "dropdown", options: ["Monocrystalline", "Polycrystalline"], required: true },
+      { name: "Brand", type: "text", required: true }
+    ]
+  },
+  {
+    id: "batteries",
+    name: "Batteries",
+    fields: [
+      { name: "Capacity", type: "text", required: true },
+      { name: "Voltage", type: "dropdown", options: ["12V", "24V", "48V"], required: true },
+      { name: "Chemistry Type", type: "dropdown", options: ["Lead-acid", "Lithium-ion", "Gel"], required: true },
+      { name: "Brand", type: "text", required: true }
+    ]
+  },
+  {
+    id: "breakers",
+    name: "Breakers/Switches",
+    fields: [
+      { name: "Amperage", type: "text", required: true },
+      { name: "Type", type: "dropdown", options: ["MCB", "RCBO", "GFCI"], required: true },
+      { name: "Poles", type: "dropdown", options: ["1P", "2P", "3P", "4P"], required: true },
+      { name: "Brand", type: "text", required: true }
+    ]
+  },
+  {
+    id: "inverters",
+    name: "Inverters",
+    fields: [
+      { name: "Wattage", type: "text", required: true },
+      { name: "Input Voltage", type: "dropdown", options: ["12V", "24V", "48V"], required: true },
+      { name: "Output Voltage", type: "dropdown", options: ["230V AC"], required: true },
+      { name: "Wave Type", type: "dropdown", options: ["Pure Sine", "Modified Sine"], required: true },
+      { name: "Brand", type: "text", required: true }
+    ]
+  }
+];
+
 const MOCK_PRODUCTS = [
-  { id: 1, name: 'Solar Panel 150W', category: 'Solar Panels', quantity: 25, basePrice: 120, sku: 'SP-150-001' },
-  { id: 2, name: 'Solar Panel 300W', category: 'Solar Panels', quantity: 10, basePrice: 220, sku: 'SP-300-002' },
-  { id: 3, name: 'Inverter 1000W', category: 'Inverters', quantity: 4, basePrice: 350, sku: 'INV-1K-001' },
-  { id: 4, name: 'Inverter 3000W Hybrid', category: 'Inverters', quantity: 2, basePrice: 850, sku: 'INV-3K-002' },
-  { id: 5, name: 'Deep Cycle Battery 100Ah', category: 'Batteries', quantity: 15, basePrice: 180, sku: 'BAT-100-001' },
-  { id: 6, name: 'Lithium Ion Battery 200Ah', category: 'Batteries', quantity: 3, basePrice: 650, sku: 'BAT-200-002' },
-  { id: 7, name: 'DC Breaker 63A', category: 'Breakers', quantity: 50, basePrice: 15, sku: 'BRK-DC-063' },
-  { id: 8, name: 'AC Breaker 32A', category: 'Breakers', quantity: 100, basePrice: 10, sku: 'BRK-AC-032' },
+  { 
+    id: 1, name: 'Solar Panel 150W', category: 'Solar Panels', quantity: 25, basePrice: 15000, sku: 'SP-150-001',
+    categoryFields: { Wattage: "150W", Voltage: "12V", Type: "Polycrystalline", Brand: "SunPower" },
+    customFields: { Warranty: "5 years" },
+    priceHistory: [
+      { date: "2024-01-15", price: 15000, customerName: "Ali" },
+      { date: "2024-01-14", price: 14500, customerName: "Usman" },
+      { date: "2024-01-13", price: 14000, customerName: "Zain" }
+    ]
+  },
+  { 
+    id: 2, name: 'Deep Cycle Battery 100Ah', category: 'Batteries', quantity: 15, basePrice: 45000, sku: 'BAT-100-001',
+    categoryFields: { Capacity: "100Ah", Voltage: "12V", "Chemistry Type": "Lead-acid", Brand: "Exide" },
+    customFields: {},
+    priceHistory: [
+      { date: "2024-01-10", price: 44000, customerName: "Kamran" }
+    ]
+  },
+  { 
+    id: 3, name: 'Inverter 1000W', category: 'Inverters', quantity: 4, basePrice: 25000, sku: 'INV-1K-001',
+    categoryFields: { Wattage: "1000W", "Input Voltage": "12V", "Output Voltage": "230V AC", "Wave Type": "Modified Sine", Brand: "Homage" },
+    customFields: {},
+    priceHistory: []
+  },
+  { 
+    id: 4, name: 'DC Breaker 63A', category: 'Breakers/Switches', quantity: 50, basePrice: 1500, sku: 'BRK-DC-063',
+    categoryFields: { Amperage: "63A", Type: "MCB", Poles: "2P", Brand: "Tomzn" },
+    customFields: {},
+    priceHistory: []
+  }
 ];
 
 const MOCK_ORDERS = [
   { 
     id: 'ORD-1001', 
     date: new Date(Date.now() - 86400000 * 2).toISOString(), 
-    items: [{ product: MOCK_PRODUCTS[0], qty: 2, unitPrice: 120, total: 240 }],
-    subtotal: 240, discount: 0, tax: 24, total: 264, status: 'completed'
-  },
-  { 
-    id: 'ORD-1002', 
-    date: new Date(Date.now() - 86400000).toISOString(), 
-    items: [{ product: MOCK_PRODUCTS[2], qty: 1, unitPrice: 350, total: 350 }],
-    subtotal: 350, discount: 10, tax: 34, total: 374, status: 'completed'
+    customerName: 'Ahmad',
+    items: [{ 
+      product: MOCK_PRODUCTS[0], 
+      qty: 2, 
+      basePrice: 15000, 
+      negotiatedPrice: 14500, 
+      discount: -1000, 
+      lineTotal: 29000 
+    }],
+    subtotal: 29000, totalDiscount: -1000, tax: 0, finalTotal: 29000, status: 'completed'
   }
 ];
 
@@ -42,9 +110,12 @@ export const AppProvider = ({ children }) => {
   const [orders, setOrders] = useState(MOCK_ORDERS);
   const [settings, setSettings] = useState({
     shopName: 'Electro POS System',
-    taxRate: 10, // 10%
+    taxRate: 0, // 0% usually in Pak
     discountThreshold: 15, // 15% max without admin
+    currency: 'PKR',
+    priceHistoryRetention: 5
   });
+  const [categories, setCategories] = useState(MOCK_CATEGORIES);
 
   // Load user from localStorage if 'remember me' was checked
   useEffect(() => {
@@ -97,8 +168,26 @@ export const AppProvider = ({ children }) => {
     if (product.id) {
       setProducts(products.map(p => p.id === product.id ? product : p));
     } else {
-      setProducts([...products, { ...product, id: Date.now() }]);
+      setProducts([...products, { ...product, id: Date.now(), priceHistory: [] }]);
     }
+  };
+
+  const addCategory = (categoryData) => {
+    setCategories([...categories, { ...categoryData, id: categoryData.name.toLowerCase().replace(/\s+/g, '-') }]);
+  };
+
+  const updateCategory = (category) => {
+    setCategories(categories.map(c => c.id === category.id ? category : c));
+  };
+
+  const deleteCategory = (categoryId) => {
+    // Check if products exist
+    const hasProducts = products.some(p => p.category === categories.find(c => c.id === categoryId)?.name);
+    if (hasProducts) {
+      return false; // Can't delete
+    }
+    setCategories(categories.filter(c => c.id !== categoryId));
+    return true;
   };
 
   return (
@@ -106,7 +195,8 @@ export const AppProvider = ({ children }) => {
       user, login, logout,
       products, updateProduct,
       orders, addOrder,
-      settings, setSettings
+      settings, setSettings,
+      categories, addCategory, updateCategory, deleteCategory
     }}>
       {children}
     </AppContext.Provider>
