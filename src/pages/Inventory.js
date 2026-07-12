@@ -4,18 +4,67 @@ import { useAppContext } from '../context/AppContext';
 import { Plus, Search, Edit2, X, Check, Package } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const ProductModal = ({ isOpen, onClose, product, onSave }) => {
+  const { categories } = useAppContext();
   const [formData, setFormData] = useState({
-    name: '', category: 'Solar Panels', quantity: 0, basePrice: 0, sku: ''
+    name: '', category: categories[0]?.name || 'Solar Panels', quantity: 0, basePrice: 0, sku: '',
+    categoryFields: {}, customFields: {}
   });
+
+  const [newCustomFieldName, setNewCustomFieldName] = useState('');
 
   useEffect(() => {
     if (product) {
-      setFormData(product);
+      setFormData({
+        ...product,
+        categoryFields: product.categoryFields || {},
+        customFields: product.customFields || {}
+      });
     } else {
-      setFormData({ name: '', category: 'Solar Panels', quantity: 0, basePrice: 0, sku: '' });
+      setFormData({ 
+        name: '', category: categories[0]?.name || 'Solar Panels', quantity: 0, basePrice: 0, sku: '',
+        categoryFields: {}, customFields: {} 
+      });
     }
-  }, [product, isOpen]);
+  }, [product, isOpen, categories]);
+
+  const selectedCategoryObj = categories.find(c => c.name === formData.category);
+
+  // When category changes, reset category fields
+  const handleCategoryChange = (e) => {
+    setFormData({ ...formData, category: e.target.value, categoryFields: {} });
+  };
+
+  const handleCategoryFieldChange = (fieldName, value) => {
+    setFormData({
+      ...formData,
+      categoryFields: { ...formData.categoryFields, [fieldName]: value }
+    });
+  };
+
+  const handleCustomFieldChange = (fieldName, value) => {
+    setFormData({
+      ...formData,
+      customFields: { ...formData.customFields, [fieldName]: value }
+    });
+  };
+
+  const addCustomField = () => {
+    if (newCustomFieldName.trim() && !formData.customFields[newCustomFieldName.trim()]) {
+      setFormData({
+        ...formData,
+        customFields: { ...formData.customFields, [newCustomFieldName.trim()]: '' }
+      });
+      setNewCustomFieldName('');
+    } else {
+      toast.error('Invalid or duplicate custom field name');
+    }
+  };
+
+  const removeCustomField = (fieldName) => {
+    const updatedCustomFields = { ...formData.customFields };
+    delete updatedCustomFields[fieldName];
+    setFormData({ ...formData, customFields: updatedCustomFields });
+  };
 
   if (!isOpen) return null;
 
@@ -61,14 +110,12 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
               <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
               <select
                 value={formData.category}
-                onChange={e => setFormData({...formData, category: e.target.value})}
+                onChange={handleCategoryChange}
                 className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none"
               >
-                <option value="Solar Panels">Solar Panels</option>
-                <option value="Inverters">Inverters</option>
-                <option value="Batteries">Batteries</option>
-                <option value="Breakers">Breakers</option>
-                <option value="Accessories">Accessories</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -96,7 +143,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Base Price ($)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Base Price (₨)</label>
               <input
                 type="number"
                 min="0"
@@ -107,6 +154,77 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
                 required
               />
             </div>
+          </div>
+
+          {selectedCategoryObj && selectedCategoryObj.fields.length > 0 && (
+            <>
+              <h3 className="font-bold text-slate-800 border-b pb-2 mt-4">Category Fields</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {selectedCategoryObj.fields.map(field => (
+                  <div key={field.name}>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      {field.name} {field.required && '*'}
+                    </label>
+                    {field.type === 'dropdown' ? (
+                      <select
+                        value={formData.categoryFields[field.name] || ''}
+                        onChange={(e) => handleCategoryFieldChange(field.name, e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none"
+                        required={field.required}
+                      >
+                        <option value="">Select...</option>
+                        {field.options.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type={field.type === 'number' ? 'number' : 'text'}
+                        value={formData.categoryFields[field.name] || ''}
+                        onChange={(e) => handleCategoryFieldChange(field.name, e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none"
+                        required={field.required}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          <h3 className="font-bold text-slate-800 border-b pb-2 mt-4">Custom Fields</h3>
+          {Object.keys(formData.customFields).length > 0 && (
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              {Object.keys(formData.customFields).map(fieldName => (
+                <div key={fieldName}>
+                  <label className="block text-sm font-medium text-slate-700 mb-1 flex justify-between">
+                    {fieldName}
+                    <button type="button" onClick={() => removeCustomField(fieldName)} className="text-red-500 hover:text-red-700">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.customFields[fieldName]}
+                    onChange={(e) => handleCustomFieldChange(fieldName, e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="New field name..."
+              value={newCustomFieldName}
+              onChange={(e) => setNewCustomFieldName(e.target.value)}
+              className="flex-1 px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-blue outline-none"
+            />
+            <button type="button" onClick={addCustomField} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg font-medium text-slate-700 transition-colors">
+              Add Field
+            </button>
           </div>
 
           <div className="mt-8 flex gap-3 justify-end">
@@ -125,7 +243,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }) => {
 };
 
 const Inventory = () => {
-  const { products, updateProduct, user } = useAppContext();
+  const { products, updateProduct, user, categories } = useAppContext();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [filterCategory, setFilterCategory] = useState('All');
@@ -134,7 +252,9 @@ const Inventory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  const categories = ['All', ...new Set(products.map(p => p.category))];
+  const categoryNames = ['All', ...categories.map(c => c.name)];
+  
+  const activeCategoryObj = categories.find(c => c.name === filterCategory);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -189,7 +309,7 @@ const Inventory = () => {
             onChange={(e) => setFilterCategory(e.target.value)}
             className="flex-1 md:w-48 px-4 py-3 rounded-lg bg-slate-50 border border-slate-200 focus:border-brand-blue outline-none cursor-pointer"
           >
-            {categories.map(cat => (
+            {categoryNames.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
@@ -209,7 +329,10 @@ const Inventory = () => {
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
                 <th className="py-4 px-6 font-medium">SKU</th>
                 <th className="py-4 px-6 font-medium">Product Name</th>
-                <th className="py-4 px-6 font-medium">Category</th>
+                {filterCategory === 'All' && <th className="py-4 px-6 font-medium">Category</th>}
+                {filterCategory !== 'All' && activeCategoryObj?.fields.map(f => (
+                  <th key={f.name} className="py-4 px-6 font-medium">{f.name}</th>
+                ))}
                 <th className="py-4 px-6 font-medium text-right">Base Price</th>
                 <th className="py-4 px-6 font-medium text-center">Stock</th>
                 <th className="py-4 px-6 font-medium text-center">Actions</th>
@@ -220,12 +343,19 @@ const Inventory = () => {
                 <tr key={product.id} className="hover:bg-slate-50 transition-colors">
                   <td className="py-3 px-6 text-sm font-mono text-slate-500">{product.sku}</td>
                   <td className="py-3 px-6 font-medium text-slate-900">{product.name}</td>
-                  <td className="py-3 px-6">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                      {product.category}
-                    </span>
-                  </td>
-                  <td className="py-3 px-6 text-right font-medium">${product.basePrice.toFixed(2)}</td>
+                  {filterCategory === 'All' && (
+                    <td className="py-3 px-6">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                        {product.category}
+                      </span>
+                    </td>
+                  )}
+                  {filterCategory !== 'All' && activeCategoryObj?.fields.map(f => (
+                    <td key={f.name} className="py-3 px-6 text-slate-600">
+                      {product.categoryFields?.[f.name] || '-'}
+                    </td>
+                  ))}
+                  <td className="py-3 px-6 text-right font-medium">₨ {product.basePrice.toLocaleString()}</td>
                   <td className="py-3 px-6 text-center">
                     <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold ${
                       product.quantity < 5 ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
