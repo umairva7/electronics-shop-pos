@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, FileText, Settings as SettingsIcon, LogOut, Store, Tags } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, FileText, Settings as SettingsIcon, LogOut, Store, Tags, Menu, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 const Layout = () => {
   const { user, logout, settings } = useAppContext();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -25,12 +26,25 @@ const Layout = () => {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 no-print">
+    <div className="flex h-screen bg-slate-50 no-print overflow-hidden">
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-slate-900/50 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-brand-dark text-white flex flex-col hidden md:flex">
-        <div className="p-6 flex items-center gap-3 border-b border-slate-700">
-          <Store className="w-8 h-8 text-brand-light" />
-          <h1 className="text-xl font-bold truncate">{settings.shopName}</h1>
+      <aside className={`w-64 bg-brand-dark text-white flex flex-col fixed md:relative z-50 h-full transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="p-6 flex items-center justify-between border-b border-slate-700">
+          <div className="flex items-center gap-3">
+            <Store className="w-8 h-8 text-brand-light" />
+            <h1 className="text-xl font-bold truncate">{settings.shopName}</h1>
+          </div>
+          <button className="md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
+            <X className="w-6 h-6 text-slate-300" />
+          </button>
         </div>
         
         <nav className="flex-1 py-6">
@@ -39,6 +53,7 @@ const Layout = () => {
               <li key={item.path}>
                 <NavLink
                   to={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) =>
                     `flex items-center gap-4 px-4 py-3 rounded-lg transition-colors ${
                       isActive ? 'bg-brand-blue text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
@@ -74,7 +89,18 @@ const Layout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden h-screen">
+      <main className="flex-1 flex flex-col overflow-hidden h-screen w-full relative">
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white p-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <Store className="w-6 h-6 text-brand-blue" />
+            <h1 className="text-lg font-bold truncate">{settings.shopName}</h1>
+          </div>
+          <button onClick={() => setIsMobileMenuOpen(true)}>
+            <Menu className="w-7 h-7 text-slate-600" />
+          </button>
+        </div>
+        
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
           <Outlet />
         </div>
